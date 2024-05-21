@@ -3,154 +3,160 @@ import { Node } from './node.js';
 import { ModelObject3D } from './object.js';
 import { Unit } from './unit.js';
 
-export class Model extends ModelObject3D
-{
-    constructor ()
-    {
-        super ();
+/**
+ * 3Dモデルを表すクラスです。
+ * ModelObject3Dを拡張します。
+ */
+export class Model extends ModelObject3D {
+    constructor() {
+        super();
+        // モデルの単位
         this.unit = Unit.Unknown;
-        this.root = new Node ();
+        // ルートノード
+        this.root = new Node();
+        // マテリアルの配列
         this.materials = [];
+        // メッシュの配列
         this.meshes = [];
     }
 
-    GetUnit ()
-    {
+    // ユニットを取得します。
+    GetUnit() {
         return this.unit;
     }
 
-    SetUnit (unit)
-    {
+    // ユニットを設定します。
+    SetUnit(unit) {
         this.unit = unit;
     }
 
-    GetRootNode ()
-    {
+    // ルートノードを取得します。
+    GetRootNode() {
         return this.root;
     }
 
-    NodeCount ()
-    {
+    // ノードの数を返します。
+    NodeCount() {
         let count = 0;
-        this.root.Enumerate ((node) => {
+        this.root.Enumerate((node) => {
             count += 1;
         });
         return count - 1;
     }
 
-    MaterialCount ()
-    {
+    // マテリアルの数を返します。
+    MaterialCount() {
         return this.materials.length;
     }
 
-    MeshCount ()
-    {
+    // メッシュの数を返します。
+    MeshCount() {
         return this.meshes.length;
     }
 
-    MeshInstanceCount ()
-    {
+    // メッシュインスタンスの数を返します。
+    MeshInstanceCount() {
         let count = 0;
-        this.root.Enumerate ((node) => {
-            count += node.MeshIndexCount ();
+        this.root.Enumerate((node) => {
+            count += node.MeshIndexCount();
         });
         return count;
     }
 
-    VertexCount ()
-    {
+    // 頂点の数を返します。
+    VertexCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.VertexCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.VertexCount();
         });
         return count;
     }
 
-    VertexColorCount ()
-    {
+    // 頂点カラーの数を返します。
+    VertexColorCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.VertexColorCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.VertexColorCount();
         });
         return count;
     }
 
-    NormalCount ()
-    {
+    // 法線の数を返します。
+    NormalCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.NormalCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.NormalCount();
         });
         return count;
     }
 
-    TextureUVCount ()
-    {
+    // テクスチャUVの数を返します。
+    TextureUVCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.TextureUVCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.TextureUVCount();
         });
         return count;
     }
 
-    LineCount ()
-    {
+    // 線の数を返します。
+    LineCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.LineCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.LineCount();
         });
         return count;
     }
 
-    LineSegmentCount ()
-    {
+    // 線セグメントの数を返します。
+    LineSegmentCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.LineSegmentCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.LineSegmentCount();
         });
         return count;
     }
 
-    TriangleCount ()
-    {
+    // 三角形の数を返します。
+    TriangleCount() {
         let count = 0;
-        this.EnumerateMeshInstances ((meshInstance) => {
-            count += meshInstance.TriangleCount ();
+        this.EnumerateMeshInstances((meshInstance) => {
+            count += meshInstance.TriangleCount();
         });
         return count;
     }
 
-    AddMaterial (material)
-    {
-        this.materials.push (material);
+    // マテリアルを追加します。
+    AddMaterial(material) {
+        this.materials.push(material);
         return this.materials.length - 1;
     }
 
-    GetMaterial (index)
-    {
+    // 指定されたインデックスのマテリアルを取得します。
+    GetMaterial(index) {
         return this.materials[index];
     }
 
-    AddMesh (mesh)
-    {
-        this.meshes.push (mesh);
+    // メッシュを追加します。
+    AddMesh(mesh) {
+        this.meshes.push(mesh);
         return this.meshes.length - 1;
     }
 
-    AddMeshToRootNode (mesh)
-    {
-        const meshIndex = this.AddMesh (mesh);
-        this.root.AddMeshIndex (meshIndex);
+    // メッシュをルートノードに追加します。
+    AddMeshToRootNode(mesh) {
+        const meshIndex = this.AddMesh(mesh);
+        this.root.AddMeshIndex(meshIndex);
         return meshIndex;
     }
 
-    RemoveMesh (index)
-    {
-        this.meshes.splice (index, 1);
-        this.root.Enumerate ((node) => {
+    // 指定されたインデックスのメッシュを削除します。
+    RemoveMesh(index) {
+        this.meshes.splice(index, 1);
+        this.root.Enumerate((node) => {
             for (let i = 0; i < node.meshIndices.length; i++) {
                 if (node.meshIndices[i] === index) {
-                    node.meshIndices.splice (i, 1);
+                    node.meshIndices.splice(i, 1);
                     i -= 1;
                 } else if (node.meshIndices[i] > index) {
                     node.meshIndices[i] -= 1;
@@ -159,76 +165,76 @@ export class Model extends ModelObject3D
         });
     }
 
-    GetMesh (index)
-    {
+    // 指定されたインデックスのメッシュを取得します。
+    GetMesh(index) {
         return this.meshes[index];
     }
 
-    GetMeshInstance (instanceId)
-    {
+    // 指定されたMeshInstanceIdに対応するMeshInstanceを取得します。
+    GetMeshInstance(instanceId) {
         let foundNode = null;
-        this.root.Enumerate ((node) => {
-            if (node.GetId () === instanceId.nodeId) {
+        this.root.Enumerate((node) => {
+            if (node.GetId() === instanceId.nodeId) {
                 foundNode = node;
             }
         });
         if (foundNode === null) {
             return null;
         }
-        const nodeMeshIndices = foundNode.GetMeshIndices ();
-        if (nodeMeshIndices.indexOf (instanceId.meshIndex) === -1) {
+        const nodeMeshIndices = foundNode.GetMeshIndices();
+        if (nodeMeshIndices.indexOf(instanceId.meshIndex) === -1) {
             return null;
         }
-        let foundMesh = this.GetMesh (instanceId.meshIndex);
-        let id = new MeshInstanceId (foundNode.GetId (), instanceId.meshIndex);
-        return new MeshInstance (id, foundNode, foundMesh);
+        let foundMesh = this.GetMesh(instanceId.meshIndex);
+        let id = new MeshInstanceId(foundNode.GetId(), instanceId.meshIndex);
+        return new MeshInstance(id, foundNode, foundMesh);
     }
 
-    EnumerateMeshes (onMesh)
-    {
+    // 全てのメッシュを列挙します。
+    EnumerateMeshes(onMesh) {
         for (const mesh of this.meshes) {
-            onMesh (mesh);
+            onMesh(mesh);
         }
     }
 
-    EnumerateMeshInstances (onMeshInstance)
-    {
-        this.root.Enumerate ((node) => {
-            for (let meshIndex of node.GetMeshIndices ()) {
-                let id = new MeshInstanceId (node.GetId (), meshIndex);
-                let mesh = this.GetMesh (meshIndex);
-                let meshInstance = new MeshInstance (id, node, mesh);
-                onMeshInstance (meshInstance);
+    // 全てのメッシュインスタンスを列挙します。
+    EnumerateMeshInstances(onMeshInstance) {
+        this.root.Enumerate((node) => {
+            for (let meshIndex of node.GetMeshIndices()) {
+                let id = new MeshInstanceId(node.GetId(), meshIndex);
+                let mesh = this.GetMesh(meshIndex);
+                let meshInstance = new MeshInstance(id, node, mesh);
+                onMeshInstance(meshInstance);
             }
         });
     }
 
-    EnumerateTransformedMeshInstances (onMesh)
-    {
-        this.EnumerateMeshInstances ((meshInstance) => {
-            const transformed = meshInstance.GetTransformedMesh ();
-            onMesh (transformed);
+    // 全ての変換済みメッシュインスタンスを列挙します。
+    EnumerateTransformedMeshInstances(onMesh) {
+        this.EnumerateMeshInstances((meshInstance) => {
+            const transformed = meshInstance.GetTransformedMesh();
+            onMesh(transformed);
         });
     }
 
-    EnumerateVertices (onVertex)
-    {
-        this.EnumerateMeshInstances ((meshInstance) => {
-            meshInstance.EnumerateVertices (onVertex);
+    // 全ての頂点を列挙します。
+    EnumerateVertices(onVertex) {
+        this.EnumerateMeshInstances((meshInstance) => {
+            meshInstance.EnumerateVertices(onVertex);
         });
     }
 
-    EnumerateTriangleVertexIndices (onTriangleVertexIndices)
-    {
-        this.EnumerateMeshInstances ((meshInstance) => {
-            meshInstance.EnumerateTriangleVertexIndices (onTriangleVertexIndices);
+    // 全ての三角形の頂点インデックスを列挙します。
+    EnumerateTriangleVertexIndices(onTriangleVertexIndices) {
+        this.EnumerateMeshInstances((meshInstance) => {
+            meshInstance.EnumerateTriangleVertexIndices(onTriangleVertexIndices);
         });
     }
 
-    EnumerateTriangleVertices (onTriangleVertices)
-    {
-        this.EnumerateMeshInstances ((meshInstance) => {
-            meshInstance.EnumerateTriangleVertices (onTriangleVertices);
+    // 全ての三角形の頂点を列挙します。
+    EnumerateTriangleVertices(onTriangleVertices) {
+        this.EnumerateMeshInstances((meshInstance) => {
+            meshInstance.EnumerateTriangleVertices(onTriangleVertices);
         });
     }
 }

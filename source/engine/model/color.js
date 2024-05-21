@@ -1,56 +1,50 @@
 /**
- * RGB color object. Components are integers in the range of 0..255.
+ * RGB色オブジェクト。成分は0から255の整数です。
  */
-export class RGBColor
-{
+export class RGBColor {
     /**
-     * @param {integer} r Red component.
-     * @param {integer} g Green component.
-     * @param {integer} b Blue component.
+     * @param {integer} r 赤の成分。
+     * @param {integer} g 緑の成分。
+     * @param {integer} b 青の成分。
      */
-    constructor (r, g, b)
-    {
+    constructor(r, g, b) {
         this.r = r;
         this.g = g;
         this.b = b;
     }
 
     /**
-     * Sets the value of all components.
-     * @param {integer} r Red component.
-     * @param {integer} g Green component.
-     * @param {integer} b Blue component.
+     * 全ての成分の値を設定します。
+     * @param {integer} r 赤の成分。
+     * @param {integer} g 緑の成分。
+     * @param {integer} b 青の成分。
      */
-    Set (r, g, b)
-    {
+    Set(r, g, b) {
         this.r = r;
         this.g = g;
         this.b = b;
     }
 
     /**
-     * Creates a clone of the object.
-     * @returns {RGBColor}
+     * オブジェクトのクローンを作成して返します。
+     * @returns {RGBColor} 新しいRGBColorオブジェクト。
      */
-    Clone ()
-    {
-        return new RGBColor (this.r, this.g, this.b);
+    Clone() {
+        return new RGBColor(this.r, this.g, this.b);
     }
 }
 
 /**
- * RGBA color object. Components are integers in the range of 0..255.
+ * RGBA色オブジェクト。成分は0から255の整数です。アルファ成分を含みます。
  */
-export class RGBAColor
-{
+export class RGBAColor {
     /**
-     * @param {integer} r Red component.
-     * @param {integer} g Green component.
-     * @param {integer} b Blue component.
-     * @param {integer} a Alpha component.
+     * @param {integer} r 赤の成分。
+     * @param {integer} g 緑の成分。
+     * @param {integer} b 青の成分。
+     * @param {integer} a アルファの成分。
      */
-    constructor (r, g, b, a)
-    {
+    constructor(r, g, b, a) {
         this.r = r;
         this.g = g;
         this.b = b;
@@ -58,14 +52,13 @@ export class RGBAColor
     }
 
     /**
-     * Sets the value of all components.
-     * @param {integer} r Red component.
-     * @param {integer} g Green component.
-     * @param {integer} b Blue component.
-     * @param {integer} a Alpha component.
+     * 全ての成分の値を設定します。
+     * @param {integer} r 赤の成分。
+     * @param {integer} g 緑の成分。
+     * @param {integer} b 青の成分。
+     * @param {integer} a アルファの成分。
      */
-    Set (r, g, b, a)
-    {
+    Set(r, g, b, a) {
         this.r = r;
         this.g = g;
         this.b = b;
@@ -73,112 +66,135 @@ export class RGBAColor
     }
 
     /**
-     * Creates a clone of the object.
-     * @returns {RGBAColor}
+     * オブジェクトのクローンを作成して返します。
+     * @returns {RGBAColor} 新しいRGBAColorオブジェクト。
      */
-    Clone ()
-    {
-        return new RGBAColor (this.r, this.g, this.b, this.a);
+    Clone() {
+        return new RGBAColor(this.r, this.g, this.b, this.a);
     }
 }
 
-export function ColorComponentFromFloat (component)
-{
-    return parseInt (Math.round (component * 255.0), 10);
+/**
+ * 浮動小数点数からカラーコンポーネントへの変換。
+ */
+export function ColorComponentFromFloat(component) {
+    return parseInt(Math.round(component * 255.0), 10);
 }
 
-export function ColorComponentToFloat (component)
-{
+/**
+ * カラーコンポーネントから浮動小数点数への変換。
+ */
+export function ColorComponentToFloat(component) {
     return component / 255.0;
 }
 
-export function RGBColorFromFloatComponents (r, g, b)
-{
-    return new RGBColor (
-        ColorComponentFromFloat (r),
-        ColorComponentFromFloat (g),
-        ColorComponentFromFloat (b)
+/**
+ * 浮動小数点数からRGBColorオブジェクトを生成します。
+ */
+export function RGBColorFromFloatComponents(r, g, b) {
+    return new RGBColor(
+        ColorComponentFromFloat(r),
+        ColorComponentFromFloat(g),
+        ColorComponentFromFloat(b)
     );
 }
 
-export function SRGBToLinear (component)
-{
+/**
+ * SRGBからリニアRGBへの変換。
+ */
+export function SRGBToLinear(component) {
     if (component < 0.04045) {
         return component * 0.0773993808;
     } else {
-        return Math.pow (component * 0.9478672986 + 0.0521327014, 2.4);
+        return Math.pow(component * 0.9478672986 + 0.0521327014, 2.4);
     }
 }
 
-export function LinearToSRGB (component)
-{
+/**
+ * リニアRGBからSRGBへの変換。
+ */
+export function LinearToSRGB(component) {
     if (component < 0.0031308) {
         return component * 12.92;
     } else {
-        return 1.055 * (Math.pow (component, 0.41666)) - 0.055;
+        return 1.055 * (Math.pow(component, 0.41666)) - 0.055;
     }
 }
 
-export function IntegerToHexString (intVal)
-{
-    let result = parseInt (intVal, 10).toString (16);
+/**
+ * 整数から16進数文字列への変換。
+ */
+export function IntegerToHexString(intVal) {
+    let result = parseInt(intVal, 10).toString(16);
     while (result.length < 2) {
         result = '0' + result;
     }
     return result;
 }
 
-export function RGBColorToHexString (color)
-{
-    let r = IntegerToHexString (color.r);
-    let g = IntegerToHexString (color.g);
-    let b = IntegerToHexString (color.b);
+/**
+ * RGBColorオブジェクトから16進数文字列への変換。
+ */
+export function RGBColorToHexString(color) {
+    let r = IntegerToHexString(color.r);
+    let g = IntegerToHexString(color.g);
+    let b = IntegerToHexString(color.b);
     return r + g + b;
 }
 
-export function RGBAColorToHexString (color)
-{
-    let r = IntegerToHexString (color.r);
-    let g = IntegerToHexString (color.g);
-    let b = IntegerToHexString (color.b);
-    let a = IntegerToHexString (color.a);
+/**
+ * RGBAColorオブジェクトから16進数文字列への変換。
+ */
+export function RGBAColorToHexString(color) {
+    let r = IntegerToHexString(color.r);
+    let g = IntegerToHexString(color.g);
+    let b = IntegerToHexString(color.b);
+    let a = IntegerToHexString(color.a);
     return r + g + b + a;
 }
 
-export function HexStringToRGBColor (hexString)
-{
+/**
+ * 16進数文字列からRGBColorオブジェクトへの変換。
+ */
+export function HexStringToRGBColor(hexString) {
     if (hexString.length !== 6) {
         return null;
     }
 
-    let r = parseInt (hexString.substring (0, 2), 16);
-    let g = parseInt (hexString.substring (2, 4), 16);
-    let b = parseInt (hexString.substring (4, 6), 16);
-    return new RGBColor (r, g, b);
+    let r = parseInt(hexString.substring(0, 2), 16);
+    let g = parseInt(hexString.substring(2, 4), 16);
+    let b = parseInt(hexString.substring(4, 6), 16);
+    return new RGBColor(r, g, b);
 }
 
-export function HexStringToRGBAColor (hexString)
-{
+/**
+ * 16進数文字列からRGBAColorオブジェクトへの変換。
+ */
+export function HexStringToRGBAColor(hexString) {
     if (hexString.length !== 6 && hexString.length !== 8) {
         return null;
     }
 
-    let r = parseInt (hexString.substring (0, 2), 16);
-    let g = parseInt (hexString.substring (2, 4), 16);
-    let b = parseInt (hexString.substring (4, 6), 16);
+    let r = parseInt(hexString.substring(0, 2), 16);
+    let g = parseInt(hexString.substring(2, 4), 16);
+    let b = parseInt(hexString.substring(4, 6), 16);
     let a = 255;
     if (hexString.length === 8) {
-        a = parseInt (hexString.substring (6, 8), 16);
+        a = parseInt(hexString.substring(6, 8), 16);
     }
-    return new RGBAColor (r, g, b, a);
+    return new RGBAColor(r, g, b, a);
 }
 
-export function ArrayToRGBColor (arr)
-{
-	return new RGBColor (arr[0], arr[1], arr[2]);
+/**
+ * 配列からRGBColorオブジェクトへの変換。
+ */
+export function ArrayToRGBColor(arr) {
+    return new RGBColor(arr[0], arr[1], arr[2]);
 }
 
-export function RGBColorIsEqual (a, b)
-{
-	return a.r === b.r && a.g === b.g && a.b === b.b;
+/**
+ * 二つのRGBColorオブジェクトが等しいかどうかを判定します。
+ */
+export function RGBColorIsEqual(a, b) {
+    return a.r === b.r && a.g === b.g && a.b === b.b;
 }

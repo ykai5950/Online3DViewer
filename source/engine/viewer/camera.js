@@ -2,42 +2,40 @@ import { CoordIsEqual3D } from '../geometry/coord3d.js';
 import { IsEqual } from '../geometry/geometry.js';
 
 /**
- * Camera navigation mode.
+ * カメラのナビゲーションモード。
  * @enum
  */
 export const NavigationMode =
 {
-    /** Fixed up vector. */
-	FixedUpVector : 1,
-    /** Free orbit. */
-	FreeOrbit : 2
+    /** 固定の上方ベクトル。 */
+    FixedUpVector: 1,
+    /** 自由な軌道。 */
+    FreeOrbit: 2
 };
 
 /**
- * Camera projection mode.
+ * カメラの投影モード。
  * @enum
  */
 export const ProjectionMode =
 {
-    /** Perspective projection. */
-	Perspective : 1,
-    /** Orthographic projection. */
-	Orthographic : 2
+    /** 透視投影。 */
+    Perspective: 1,
+    /** 正射影。 */
+    Orthographic: 2
 };
 
 /**
- * Camera object.
+ * カメラオブジェクト。
  */
-export class Camera
-{
+export class Camera {
     /**
-     * @param {Coord3D} eye Eye position.
-     * @param {Coord3D} center Center position. Sometimes it's called target or look at position.
-     * @param {Coord3D} up Up vector.
-     * @param {number} fov Field of view in degrees.
+     * @param {Coord3D} eye カメラの位置。
+     * @param {Coord3D} center 中心位置。場合によってはターゲットまたは見る位置と呼ばれることもあります。
+     * @param {Coord3D} up 上方ベクトル。
+     * @param {number} fov 視野角（度）。
      */
-    constructor (eye, center, up, fov)
-    {
+    constructor(eye, center, up, fov) {
         this.eye = eye;
         this.center = center;
         this.up = up;
@@ -45,21 +43,25 @@ export class Camera
     }
 
     /**
-     * Creates a clone of the object.
+     * オブジェクトのクローンを作成します。
      * @returns {Camera}
      */
-    Clone ()
-    {
-        return new Camera (
-            this.eye.Clone (),
-            this.center.Clone (),
-            this.up.Clone (),
+    Clone() {
+        return new Camera(
+            this.eye.Clone(),
+            this.center.Clone(),
+            this.up.Clone(),
             this.fov
         );
     }
 }
 
-export function CameraIsEqual3D (a, b)
-{
-	return CoordIsEqual3D (a.eye, b.eye) && CoordIsEqual3D (a.center, b.center) && CoordIsEqual3D (a.up, b.up) && IsEqual (a.fov, b.fov);
+/**
+ * 2つのカメラが等しいかどうかを判定します。
+ * @param {Camera} a カメラA。
+ * @param {Camera} b カメラB。
+ * @returns {boolean} カメラが等しい場合はtrue、それ以外の場合はfalse。
+ */
+export function CameraIsEqual3D(a, b) {
+    return CoordIsEqual3D(a.eye, b.eye) && CoordIsEqual3D(a.center, b.center) && CoordIsEqual3D(a.up, b.up) && IsEqual(a.fov, b.fov);
 }
