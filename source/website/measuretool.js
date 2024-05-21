@@ -34,7 +34,7 @@ function GetFaceWorldNormal(intersection) {
 function CreateMaterial() {
     // LineBasicMaterialを作成して返す
     return new THREE.LineBasicMaterial({
-        color: 0x263238, // 線の色を設定
+        color: 0xff0000, // 線の色を設定
         depthTest: false // 深度テストを無効化
     });
 }
@@ -268,13 +268,8 @@ export class MeasureTool {
 
     // マーカーを生成する
     GenerateMarker(intersection) {
-        // バウンディングスフェアを取得する
-        let boundingSphere = this.viewer.GetBoundingSphere((meshUserData) => {
-            return true;
-        });
-
         // マーカーの半径を設定する
-        let radius = boundingSphere.radius / 20.0;
+        let radius = 0.03;
         // 新しいマーカーを作成する
         let marker = new Marker(intersection, radius);
         // ビューアーにマーカーオブジェクトを追加する
