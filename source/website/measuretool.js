@@ -266,10 +266,33 @@ export class MeasureTool {
         }
     }
 
+    // 複数のマーカーを追加する
+    AddAnyMarker(intersection) {
+        // 新しいマーカーを作成する
+        let marker = this.GenerateMarker(intersection);
+        // マーカーを配列に追加する
+        this.markers.push(marker);
+        // マーカーの数を取得
+        const markerLength = this.markers.length;
+        // マーカーが2つある場合は2点を結ぶ線を追加する
+        if (markerLength >= 2) {
+            let material = CreateMaterial();
+            let aPoint = this.markers[markerLength - 2].GetIntersection().point;
+            let bPoint = this.markers[markerLength - 1].GetIntersection().point;
+            this.viewer.AddExtraObject(CreateLineFromPoints([aPoint, bPoint], material));
+        }
+    }
+
     // マーカーを生成する
     GenerateMarker(intersection) {
+        // バウンディングスフェアを取得する
+        let boundingSphere = this.viewer.GetBoundingSphere((meshUserData) => {
+            return true;
+        });
+
         // マーカーの半径を設定する
-        let radius = 0.03;
+        let radius = boundingSphere.radius / 200.0;
+
         // 新しいマーカーを作成する
         let marker = new Marker(intersection, radius);
         // ビューアーにマーカーオブジェクトを追加する
