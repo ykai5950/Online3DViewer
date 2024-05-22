@@ -340,34 +340,47 @@ export class ViewerMainModel {
     }
 
     GetMeshIntersectionUnderMouse(intersectionMode, mouseCoords, camera, width, height) {
+        // メインモデルが空の場合はnullを返す
         if (this.mainModel.IsEmpty()) {
             return null;
         }
 
+        // マウス座標がウィンドウの範囲外の場合はnullを返す
         if (mouseCoords.x < 0.0 || mouseCoords.x > width || mouseCoords.y < 0.0 || mouseCoords.y > height) {
             return null;
         }
 
+        // マウス座標を正規化デバイス座標系に変換
         let mousePos = new THREE.Vector2();
         mousePos.x = (mouseCoords.x / width) * 2 - 1;
         mousePos.y = -(mouseCoords.y / height) * 2 + 1;
 
+        // レイキャスターを作成し、カメラに対してマウス座標からのレイを設定
         let raycaster = new THREE.Raycaster();
         raycaster.setFromCamera(mousePos, camera);
-        raycaster.params.Line.threshold = 10.0;
+        raycaster.params.Line.threshold = 10.0; // レイのしきい値を設定
 
+        // メインモデルのルートオブジェクトとの交差を取得
         let iSectObjects = raycaster.intersectObject(this.mainModel.GetRootObject(), true);
+
+        // 交差したオブジェクトをループで処理
         for (let i = 0; i < iSectObjects.length; i++) {
             let iSectObject = iSectObjects[i];
+            // オブジェクトが非表示の場合は次のオブジェクトへ
             if (!iSectObject.object.visible) {
                 continue;
             }
+            // 交差したオブジェクトがメッシュの場合
             if (iSectObject.object.isMesh) {
-                return iSectObject;
-            } else if (iSectObject.object.isLineSegments) {
+                return iSectObject; // 交差したオブジェクトを返す
+            }
+            // 交差したオブジェクトがラインセグメントの場合
+            else if (iSectObject.object.isLineSegments) {
+                // 交差モードがメッシュのみの場合は次のオブジェクトへ
                 if (intersectionMode === IntersectionMode.MeshOnly) {
                     continue;
                 }
+                // カメラからラインセグメントまでの距離を計算し、しきい値より小さい場合は交差したオブジェクトを返す
                 let distance = GetLineSegmentsProjectedDistance(camera, width, height, iSectObject.object, mouseCoords);
                 if (distance > LineThresholdInPixels) {
                     continue;
@@ -376,6 +389,6 @@ export class ViewerMainModel {
             }
         }
 
-        return null;
+        return null; // 交差したオブジェクトがない場合はnullを返す
     }
 }

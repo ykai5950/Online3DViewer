@@ -221,13 +221,19 @@ export class Navigator {
 
     // 選択を設定
     SetSelection(selection) {
+        // エンティティの選択状態を設定する内部関数
         function SetEntitySelection(navigator, selection, select) {
+            // 選択されたエンティティがマテリアルの場合
             if (selection.type === SelectionType.Material) {
+                // 選択されたマテリアルを表示し、選択状態を設定
                 if (select && navigator.panelSet.IsPanelsVisible()) {
                     navigator.panelSet.ShowPanel(navigator.materialsPanel);
                 }
                 navigator.materialsPanel.SelectMaterialItem(selection.materialIndex, select);
-            } else if (selection.type === SelectionType.Mesh) {
+            }
+            // 選択されたエンティティがメッシュの場合
+            else if (selection.type === SelectionType.Mesh) {
+                // 選択されたメッシュを表示し、選択状態を設定
                 if (select && navigator.panelSet.IsPanelsVisible()) {
                     navigator.panelSet.ShowPanel(navigator.meshesPanel);
                 }
@@ -235,49 +241,62 @@ export class Navigator {
             }
         }
 
+        // 現在の選択状態を設定する内部関数
         function SetCurrentSelection(navigator, selection) {
             navigator.selection = selection;
             navigator.OnSelectionChanged();
         }
 
+        // 古い選択状態を取得し、存在する場合は解除
         let oldSelection = this.selection;
         if (oldSelection !== null) {
             SetEntitySelection(this, oldSelection, false);
         }
 
+        // 新しい選択状態を設定し、選択があればエンティティを表示および選択状態を設定
         SetCurrentSelection(this, selection);
         this.tempSelectedMeshId = null;
 
+        // 新しい選択状態が存在する場合
         if (this.selection !== null) {
+            // 古い選択状態が存在し、同じ場合は選択を解除し、選択状態をnullに設定
             if (oldSelection !== null && oldSelection.IsEqual(this.selection)) {
                 SetEntitySelection(this, this.selection, false);
                 SetCurrentSelection(this, null);
-            } else {
+            }
+            // 新しい選択状態が異なる場合はエンティティを表示し、選択状態を設定
+            else {
                 SetEntitySelection(this, this.selection, true);
             }
         }
 
+        // メッシュの選択が変更されたことをコールバックで通知
         this.callbacks.onMeshSelectionChanged();
     }
 
     // 選択変更時の処理
     OnSelectionChanged() {
+        // 選択がない場合
         if (this.selection === null) {
+            // 選択がクリアされたことをコールバックで通知
             this.callbacks.onSelectionCleared();
         } else {
+            // 選択された種類に応じて、適切なコールバックを実行
             if (this.selection.type === SelectionType.Material) {
                 this.callbacks.onMaterialSelected(this.selection.materialIndex);
             } else if (this.selection.type === SelectionType.Mesh) {
                 this.callbacks.onMeshSelected(this.selection.meshInstanceId);
             }
         }
+        // パネルを更新
         this.UpdatePanels();
     }
 
-    // パネルを更新
+    // パネルを更新する関数
     UpdatePanels() {
         let materialIndex = null;
         let meshInstanceId = null;
+        // 選択がある場合、選択された種類に応じてインデックスを設定
         if (this.selection !== null) {
             if (this.selection.type === SelectionType.Material) {
                 materialIndex = this.selection.materialIndex;
@@ -285,7 +304,7 @@ export class Navigator {
                 meshInstanceId = this.selection.meshInstanceId;
             }
         }
-
+        // マテリアルとメッシュの関連情報を取得してパネルを更新
         let usedByMeshes = this.callbacks.getMeshesForMaterial(materialIndex);
         this.materialsPanel.UpdateMeshList(usedByMeshes);
 
@@ -293,23 +312,27 @@ export class Navigator {
         this.meshesPanel.UpdateMaterialList(usedByMaterials);
     }
 
-    // ノードをウィンドウにフィット
+    // ノードをウィンドウにフィットさせる関数
     FitNodeToWindow(nodeId) {
         let meshInstanceIdSet = new Set();
+        // ノード内のメッシュを列挙してメッシュインスタンス ID をセットに追加
         let nodeItem = this.meshesPanel.GetNodeItem(nodeId);
         nodeItem.EnumerateMeshItems((meshItem) => {
             meshInstanceIdSet.add(meshItem.GetMeshInstanceId());
         });
+        // メッシュをウィンドウにフィットさせるコールバックを実行
         this.callbacks.fitMeshesToWindow(meshInstanceIdSet);
     }
 
-    // メッシュをウィンドウにフィット
+    // メッシュをウィンドウにフィットさせる関数
     FitMeshToWindow(meshInstanceId) {
+        // メッシュをウィンドウにフィットさせるコールバックを実行
         this.callbacks.fitMeshToWindow(meshInstanceId);
     }
 
-    // ナビゲーターをクリア
+    // ナビゲーターをクリアする関数
     Clear() {
+        // パネルをクリアし、選択を null に設定
         this.panelSet.Clear();
         this.selection = null;
     }
