@@ -1,5 +1,5 @@
 import { IsEqual } from './geometry.js';
-
+import { eigs, re } from 'mathjs';
 // Coord3Dクラスは3次元座標を表すクラスです
 export class Coord3D {
 	// コンストラクタ: x, y, zの3つの座標値を受け取り、Coord3Dオブジェクトを生成します
@@ -132,4 +132,132 @@ export function VectorLength3D(x, y, z) {
 // 配列を3次元座標に変換する関数です
 export function ArrayToCoord3D(arr) {
 	return new Coord3D(arr[0], arr[1], arr[2]);
+}
+
+// 平均を計算する関数
+function Mean(points) {
+	let sum = points.reduce((acc, point) => {
+		// 各座標の合計を計算
+		acc.x += point.x;
+		acc.y += point.y;
+		acc.z += point.z;
+		return acc;
+	}, { x: 0, y: 0, z: 0 });  // 合計を初期化
+
+	let n = points.length;  // ポイントの数を取得
+	return { x: sum.x / n, y: sum.y / n, z: sum.z / n };  // 各座標の平均を返す
+}
+
+// 共分散行列を計算する関数
+function CovarianceMatrix(points, mean) {
+	let matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];  // 共分散行列を初期化
+	points.forEach(point => {
+		let dx = point.x - mean.x;
+		let dy = point.y - mean.y;
+		let dz = point.z - mean.z;
+
+		// 共分散行列の要素を計算
+		matrix[0][0] += dx * dx;
+		matrix[0][1] += dx * dy;
+		matrix[0][2] += dx * dz;
+		matrix[1][1] += dy * dy;
+		matrix[1][2] += dy * dz;
+		matrix[2][2] += dz * dz;
+	});
+
+	let n = points.length;  // ポイントの数を取得
+	// 共分散行列の各要素を平均値で割る
+	matrix[0][0] /= n;
+	matrix[0][1] /= n;
+	matrix[0][2] /= n;
+	matrix[1][1] /= n;
+	matrix[1][2] /= n;
+	matrix[2][2] /= n;
+	// 共分散行列は対称行列なので、対角線上の要素をコピーする
+	matrix[1][0] = matrix[0][1];
+	matrix[2][0] = matrix[0][2];
+	matrix[2][1] = matrix[1][2];
+
+	return matrix;  // 共分散行列を返す
+}
+
+// 固有値と固有ベクトルを計算する関数
+function Eig(matrix) {
+	// math.js の機能を使用して固有値と固有ベクトルを計算
+	const eigResult = eigs(matrix);
+
+	// math.js は複素数も扱えるため、実部のみを取得
+	const eigenvalues = eigResult.values.map(value => re(value));
+	const eigenvectors = eigResult.vectors.toArray(); // 固有ベクトルは math.js の行列形式から通常の配列に変換
+
+	return {
+		values: eigenvalues,
+		vectors: eigenvectors
+	};
+}
+
+// 3つの点から平面を計算する関数
+function PlaneFromPoints(points) {
+	let avg = Mean(points);  // ポイントの平均を計算
+	let covMatrix = CovarianceMatrix(points, avg);  // 共分散行列を計算
+	let eigen = Eig(covMatrix);  // 固有値と固有ベクトルを計算
+
+	let normal = eigen.vectors[0];  // 最小の固有値に対応する最初の固有ベクトルを法線として使用
+	return { normal: normal, point: avg };  // 平面の法線と点を返す
+}
+
+// 点を平面に投影する関数
+function ProjectPointOntoPlane(point, plane) {
+	let { normal, point: planePoint } = plane;  // 平面の法線と点を取得
+	let diff = {
+		x: point.x - planePoint.x,
+		y: point.y - planePoint.y,
+		z: point.z - planePoint.z
+	};
+
+	// 平面への距離を計算
+	let dist = diff.x * normal[0] + diff.y * normal[1] + diff.z * normal[2];
+	// 平面上への点の投影を計算
+	return {
+		x: point.x - dist * normal[0],
+		y: point.y - dist * normal[1],
+		z: point.z - dist * normal[2]
+	};
+}
+
+// 点群を2D平面に射影する関数
+function ProjectPointsOnto2D(points, plane) {
+	let { normal, point: planePoint } = plane;  // 平面の法線と点を取得
+	let basis = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];  // 単純な直交基底
+
+	return points.map(point => {
+		let projected = ProjectPointOntoPlane(point, plane);  // 平面への点の投影を計算
+		return {
+			x: projected.x - planePoint.x,
+			y: projected.y - planePoint.y
+		};
+	});
+}
+
+// 2D平面上の面積を計算する関数
+function CalculateArea2D(points) {
+	let n = points.length;  // ポイントの数を取得
+	let area = 0;
+
+	for (let i = 0; i < n; i++) {
+		let j = (i + 1) % n;
+		// 多角形の面積を計算
+		area += points[i].x * points[j].y;
+		area -= points[i].y * points[j].x;
+	}
+
+	area = Math.abs(area) / 2.0;  // 面積を正の値にする
+	return area;  // 面積を返す
+}
+
+// 3D空間の面積を計算する関数
+export function CalculateArea3D(points) {
+	let plane = PlaneFromPoints(points);  // 3つの点から平面を計算
+	let projectedPoints = ProjectPointsOnto2D(points, plane);  // 点群を2D平面に射影
+	return CalculateArea2D(projectedPoints);  // 2D平面上の面積を計算
 }
