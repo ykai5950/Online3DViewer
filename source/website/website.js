@@ -8,7 +8,8 @@ import { AddDiv, AddDomElement, ShowDomElement, SetDomElementOuterHeight, Create
 import { CalculatePopupPositionToScreen, ShowListPopup } from './dialogs.js';
 import { HandleEvent } from './eventhandler.js';
 import { HashHandler } from './hashhandler.js';
-import { Navigator, Selection, SelectionType } from './navigator.js';
+// import { Navigator, Selection, SelectionType } from './navigator.js';    マウスクリック時のテクスチャ非表示機能削除のため
+import { Navigator } from './navigator.js';
 import { CameraSettings, Settings, Theme } from './settings.js';
 import { Sidebar } from './sidebar.js';
 import { ThemeHandler } from './themehandler.js';
@@ -22,7 +23,7 @@ import { ShowSharingDialog } from './sharingdialog.js';
 import { GetDefaultMaterials, ReplaceDefaultMaterialsColor } from '../engine/model/modelutils.js';
 import { Direction } from '../engine/geometry/geometry.js';
 import { CookieGetBoolVal, CookieSetBoolVal } from './cookiehandler.js';
-import { MeasureTool } from './measuretool.js';
+import { MeasureTool, measureMode } from './measuretool.js';
 import { CloseAllDialogs } from './dialog.js';
 import { CreateVerticalSplitter } from './splitter.js';
 import { EnumeratePlugins, PluginType } from './pluginregistry.js';
@@ -232,7 +233,7 @@ export class Website {
     // コンストラクタ
     constructor(parameters) {
         this.parameters = parameters; // パラメータの初期化
-        this.settings = new Settings(Theme.Light); // 設定を初期化（ライトテーマ）
+        this.settings = new Settings(Theme.Dark); // 設定を初期化（ライトテーマ）
         this.cameraSettings = new CameraSettings(); // カメラ設定の初期化
         this.viewer = new Viewer(); // ビューアーの初期化
         this.measureTool = new MeasureTool(this.viewer, this.settings); // 測定ツールの初期化
@@ -273,6 +274,7 @@ export class Website {
         this.InitCookieConsent(); // クッキー同意の初期化
 
         this.viewer.SetMouseClickHandler(this.OnModelClicked.bind(this)); // モデルクリックハンドラを設定
+        this.viewer.SetMouseDoubleClickHandler(this.OnModelDoubleClicked.bind(this)); // モデルダブルクリックハンドラを設定
         this.viewer.SetMouseMoveHandler(this.OnModelMouseMoved.bind(this)); // モデルマウス移動ハンドラを設定
         this.viewer.SetContextMenuHandler(this.OnModelContextMenu.bind(this)); // モデルコンテキストメニューハンドラを設定
 
@@ -366,13 +368,28 @@ export class Website {
             return;
         }
 
-        // マウス下のメッシュのユーザーデータを取得
-        let meshUserData = this.viewer.GetMeshUserDataUnderMouse(IntersectionMode.MeshAndLine, mouseCoordinates);
-        if (meshUserData === null) {
-            this.navigator.SetSelection(null); // メッシュがない場合は選択をクリア
-        } else {
-            // メッシュがある場合は選択を設定
-            this.navigator.SetSelection(new Selection(SelectionType.Mesh, meshUserData.originalMeshInstance.id));
+
+        // テクスチャを無効化する必要は無いためコメントアウト
+        //// マウス下のメッシュのユーザーデータを取得
+        // let meshUserData = this.viewer.GetMeshUserDataUnderMouse(IntersectionMode.MeshAndLine, mouseCoordinates);
+        // if (meshUserData === null) {
+        //     this.navigator.SetSelection(null); // メッシュがない場合は選択をクリア
+        // } else {
+        //     // メッシュがある場合は選択を設定
+        //     this.navigator.SetSelection(new Selection(SelectionType.Mesh, meshUserData.originalMeshInstance.id));
+        // }
+    }
+
+    // モデルがダブルクリックされたときのメソッド
+    OnModelDoubleClicked(button, mouseCoordinates) {
+        if (button !== 1) {// 左クリック以外は無視
+            return;
+        }
+
+        if (this.measureTool.IsActive()) {
+            // 面積の確定処理
+
+            return;
         }
     }
 
@@ -786,12 +803,21 @@ export class Website {
         // セパレーターを追加
         AddSeparator(this.toolbar, ['only_full_width', 'only_on_model']);
         // メジャーツールのプッシュボタンを追加
-        let measureToolButton = AddPushButton(this.toolbar, 'measure', Loc('Measure'), ['only_full_width', 'only_on_model'], (isSelected) => {
+        let measureToolButton = AddPushButton(this.toolbar, 'measure_distance', Loc('Measure'), ['only_full_width', 'only_on_model'], (isSelected) => {
             HandleEvent('measure_tool_activated', isSelected ? 'on' : 'off'); // メジャーツールの状態をイベントで通知
             this.navigator.SetSelection(null); // ナビゲーターの選択をクリア
+            this.measureTool.SetMode(measureMode.Length);   // 測定モードセット
             this.measureTool.SetActive(isSelected); // メジャーツールを有効化
         });
         this.measureTool.SetButton(measureToolButton); // メジャーツールボタンを設定
+        // 面積測定ツールのプッシュボタンを追加
+        let measureAreaToolButton = AddPushButton(this.toolbar, 'meshes', Loc('MeasureArea'), ['only_full_width', 'only_on_model'], (isSelected) => {
+            HandleEvent('measure_area_tool_activated', isSelected ? 'on' : 'off'); // 面積測定ツールの状態をイベントで通知
+            this.navigator.SetSelection(null); // ナビゲーターの選択をクリア
+            this.measureTool.SetMode(measureMode.Area);   // 面積測定モードセット
+            this.measureTool.SetActive(isSelected); // 面積測定ツールを有効化
+        });
+        this.measureTool.SetButton(measureAreaToolButton); // 面積測定ツールボタンを設定
         // セパレーターを追加
         AddSeparator(this.toolbar, ['only_full_width', 'only_on_model']);
         // ダウンロードボタンを追加
