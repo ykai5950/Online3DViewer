@@ -291,6 +291,14 @@ export class Viewer {
     }
 
     /**
+     * マウスダブルクリックのイベントハンドラーを設定します。
+     * @param {Function} onMouseDoubleClick マウスダブルクリックのイベントハンドラー関数。
+     */
+    SetMouseDoubleClickHandler(onMouseDoubleClick) {
+        this.navigation.SetMouseDoubleClickHandler(onMouseDoubleClick);
+    }
+
+    /**
      * マウス移動のイベントハンドラーを設定します。
      * @param {Function} onMouseMove マウス移動のイベントハンドラー関数。
      */

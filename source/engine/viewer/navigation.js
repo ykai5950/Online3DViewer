@@ -257,6 +257,7 @@ export class Navigation {
 			this.canvas.addEventListener('touchcancel', this.OnTouchEnd.bind(this));
 			this.canvas.addEventListener('touchend', this.OnTouchEnd.bind(this));
 			this.canvas.addEventListener('contextmenu', this.OnContextMenu.bind(this));
+			this.canvas.addEventListener('dblclick', this.OnMouseDoubleClick.bind(this));
 		}
 		if (document.addEventListener) {
 			document.addEventListener('mousemove', this.OnMouseMove.bind(this));
@@ -278,6 +279,11 @@ export class Navigation {
 	// コンテキストメニュー表示時のハンドラを設定するメソッド
 	SetContextMenuHandler(onContext) {
 		this.onContext = onContext;
+	}
+
+	// ダブルクリック時のハンドラを設定するメソッド
+	SetMouseDoubleClickHandler(onMouseDoubleClick) {
+		this.onMouseDoubleClick = onMouseDoubleClick;
 	}
 
 	// ナビゲーションモードを取得するメソッド
@@ -547,6 +553,19 @@ export class Navigation {
 		if (this.clickDetector.IsClick()) {
 			this.Context(ev.clientX, ev.clientY);
 			this.clickDetector.Cancel();
+		}
+	}
+
+	// ダブルクリック時のイベントハンドラ
+	OnMouseDoubleClick(ev) {
+		ev.preventDefault();
+
+		// ダブルクリックの座標を取得
+		let mouseCoords = GetDomElementClientCoordinates(this.canvas, ev.clientX, ev.clientY);
+
+		// ダブルクリックイベントを実行
+		if (this.onMouseDoubleClick) {
+			this.onMouseDoubleClick(ev.which, mouseCoords);
 		}
 	}
 
