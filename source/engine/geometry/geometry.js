@@ -2,6 +2,8 @@
 export const Eps = 0.00000001;
 // 比較的大きな値を表す定数BigEpsを定義しています
 export const BigEps = 0.0001;
+// 比較的大きな値を表す定数BigEpsを定義しています
+export const NearyCoord = 0.1;
 // ラジアンから度への変換係数を表す定数RadDegを定義しています
 export const RadDeg = 57.29577951308232;
 // 度からラジアンへの変換係数を表す定数DegRadを定義しています
