@@ -102,7 +102,7 @@ export class ImporterObj extends ImporterBase {
 
     // 上向き方向を取得するメソッド
     GetUpDirection() {
-        return Direction.Y;
+        return Direction.Z;
     }
 
     // コンテンツをクリアするメソッド
