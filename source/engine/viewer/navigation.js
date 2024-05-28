@@ -418,7 +418,7 @@ export class Navigation {
 
 		// ナビゲーションを実行
 		if (navigationType === NavigationType.Orbit) {
-			let orbitRatio = 0.5;
+			let orbitRatio = 0.1;
 			this.Orbit(moveDiff.x * orbitRatio, moveDiff.y * orbitRatio);
 		} else if (navigationType === NavigationType.Pan) {
 			let eyeCenterDistance = CoordDistance3D(this.camera.eye, this.camera.center);
