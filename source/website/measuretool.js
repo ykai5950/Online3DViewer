@@ -1,12 +1,13 @@
 // three.jsライブラリから幾何学的な定数をインポートする
-import { BigEps, IsEqualEps, RadDeg } from '../engine/geometry/geometry.js';
+import { BigEps, IsEqualEps, NearyCoord } from '../engine/geometry/geometry.js';
+// import { BigEps, IsEqualEps, NearyCoord, RadDeg } from '../engine/geometry/geometry.js';
 // DOMユーティリティ関数をインポートする
 import { AddDiv, ClearDomElement } from '../engine/viewer/domutils.js';
 // ユーティリティ関数をインポートする
 import { AddSvgIconElement, IsDarkTextNeededForColor } from './utils.js';
 // ローカリゼーション機能をインポートする
 import { Loc } from '../engine/core/localization.js';
-
+import { CalculateArea3D } from '../engine/geometry/coord3d.js';
 // three.jsライブラリの主要なオブジェクトをインポートする
 import * as THREE from 'three';
 // 色関連の機能をインポートする
@@ -171,6 +172,12 @@ export class MeasureTool {
         this.button = null;
     }
 
+    // モードをセットする
+    SetMode(mode) {
+        // モードをセットする
+        this.mode = mode;
+    }
+
     // ボタンを設定する
     SetButton(button) {
         // ボタンオブジェクトを設定する
@@ -215,14 +222,42 @@ export class MeasureTool {
             this.UpdatePanel();
             return;
         }
-
-        // マーカーが2つある場合はマーカーをクリアする
-        if (this.markers.length === 2) {
+        // マーカー取得
+        let marker = this.GenerateMarker(intersection).GetIntersection();
+        // 既に選択されたマーカーと同じ座標の場合
+        if (this.markers.some(existMarker => IsEqualEps(existMarker.GetIntersection().point.x, marker.point.x, NearyCoord) && IsEqualEps(existMarker.GetIntersection().point.y, marker.point.y, NearyCoord) && IsEqualEps(existMarker.GetIntersection().point.z, marker.point.z, NearyCoord))) {
             this.ClearMarkers();
+            this.UpdatePanel();
+            return;
         }
 
-        // マーカーを追加する
-        this.AddMarker(intersection);
+        // 長さ測定の場合
+        if (this.mode === measureMode.Length) {
+
+            // マーカーが2つある場合
+            if (this.markers.length === 2) {
+
+                // ここには1つの計測として保存する処理が入る想定
+
+                // 長さを測る処理
+
+                // 測定結果を描画する処理
+
+                // マーカーをクリアする
+                this.ClearMarkers();
+            }
+
+            // マーカーを追加する
+            this.AddMarker(intersection);
+        }
+        // 面積測定の場合
+        if (this.mode === measureMode.Area) {
+            // マーカーを追加する
+            this.AddAnyMarker(intersection);
+
+            // 面積を計算する
+            CalculateArea3D(intersection);
+        }
         // パネルを更新する
         this.UpdatePanel();
     }
